@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import ollama from 'ollama';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -13,16 +14,37 @@ export function activate(context: vscode.ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const get_lints_cmd = vscode.commands.registerCommand('llm4lint-vsc.get_lints', (cmd_context) => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		let llm_diagnostics = vscode.languages.createDiagnosticCollection("LLM4Lint")
-		console.log(cmd_context["path"])
-		let file_uri = vscode.Uri.file(cmd_context["path"])
-		//new vscode.DiagnosticRelatedInformation(new vscode.Location(file_uri, new vscode.Position(1,1)), "testing")
-		let file_diagnostic = new vscode.Diagnostic(new vscode.Range(1,1,1,1), "testing")
-		llm_diagnostics.set(file_uri, [file_diagnostic])
-		context.subscriptions.push(llm_diagnostics)
-		vscode.window.showInformationMessage('get_lints');
+		let llm_diagnostics = vscode.languages.createDiagnosticCollection("LLM4Lint");
+		const prompt = "Perform linting on the given code. Specify output in format: <line_number> - <type>: <issue>\n"
+		let file_uri = vscode.Uri.file(cmd_context["path"]);
+		// vscode.commands.executeCommand("vscode.open", file_uri);
+		vscode.workspace.openTextDocument(file_uri).then(async (document) => {
+			let code = document.getText();
+			let code_lines = code.split("\n");
+			let code_with_lines = "";
+			for (let index = 0; index < code_lines.length; index++) {
+				const line = code_lines[index];
+				code_with_lines += String(index+1) + "   " + line + "\n";
+			}
+			const response = await ollama.chat({
+				model: 'llm4lint7b',
+				messages: [{ role: 'user', content: prompt + code_with_lines }],
+			})
+			console.log(response.message.content)
+			const output_lines = response.message.content.split("\n")
+
+			// display diagnostics
+			let _diagnostics = []
+			for (let index = 0; index < output_lines.length; index++) {
+				const line = output_lines[index];
+				const lno = Number(line.at(0));
+				const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno,0,lno,2), line.slice(4));
+				_diagnostics.push(file_diagnostic)
+			}
+			llm_diagnostics.set(file_uri, _diagnostics)
+			context.subscriptions.push(llm_diagnostics)
+		  });
+		vscode.window.showInformationMessage('Linting...');
 	});
 	const init_shell_cmd = vscode.commands.registerCommand('llm4lint-vsc.init_shell', (cmd_context) => {
 		console.log(cmd_context["path"])
