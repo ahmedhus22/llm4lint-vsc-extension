@@ -40,8 +40,12 @@ export function activate(context: vscode.ExtensionContext) {
 			for (let index = 0; index < output_lines.length; index++) {
 				const line = output_lines[index];
 				const lno = Number(line.at(0));
+				// console.log(lno) lineno is off by +1 for some reason...
 				if (!isNaN(lno)) {
-					const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno,0,lno,2), line.slice(4), _severity);
+					const start_char = code_lines.at(lno)?.charAt(0)
+					let end_char = code_lines.at(lno)?.length
+					end_char ??= 0
+					const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno-1,0,lno-1,end_char), line.slice(4), _severity);
 					_diagnostics.push(file_diagnostic);
 				}
 			}
