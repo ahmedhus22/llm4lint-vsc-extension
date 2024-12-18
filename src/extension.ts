@@ -54,8 +54,14 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Linting...');
 	});
 	const init_shell_cmd = vscode.commands.registerCommand('llm4lint-vsc.init_shell', (cmd_context) => {
-		console.log(cmd_context["path"]);
-		vscode.window.showInformationMessage('Init_shell');
+		const script = "llm4lint " + "-i " + cmd_context["path"];
+		let terminal = vscode.window.createTerminal({
+			name: "LLM4Lint-7B",
+			hideFromUser: false,
+		});
+		terminal.sendText(script)
+		terminal.show()
+		vscode.window.showInformationMessage("If Shell fails to launch install using: 'pip install llm4lint'");
 	});
 
 	context.subscriptions.push(get_lints_cmd);
