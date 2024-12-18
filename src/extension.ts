@@ -15,7 +15,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// The commandId parameter must match the command field in package.json
 	const get_lints_cmd = vscode.commands.registerCommand('llm4lint-vsc.get_lints', (cmd_context) => {
 		let llm_diagnostics = vscode.languages.createDiagnosticCollection("LLM4Lint");
-		const prompt = "Perform linting on the given code. Specify output in format: <line_number> - <type>: <issue>\n"
+		llm_diagnostics.clear();
+		const prompt = "Perform linting on the given code. Specify output in format: <line_number> - <type>: <issue>\n";
 		let file_uri = vscode.Uri.file(cmd_context["path"]);
 		// vscode.commands.executeCommand("vscode.open", file_uri);
 		vscode.workspace.openTextDocument(file_uri).then(async (document) => {
@@ -34,25 +35,26 @@ export function activate(context: vscode.ExtensionContext) {
 			const output_lines = response.message.content.split("\n")
 
 			// display diagnostics
-			let _diagnostics = []
+			let _diagnostics = [];
+			const _severity = vscode.DiagnosticSeverity.Warning;
 			for (let index = 0; index < output_lines.length; index++) {
 				const line = output_lines[index];
 				const lno = Number(line.at(0));
 				if (!isNaN(lno)) {
-					const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno,0,lno,2), line.slice(4));
-					_diagnostics.push(file_diagnostic)
+					const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno,0,lno,2), line.slice(4), _severity);
+					_diagnostics.push(file_diagnostic);
 				}
 			}
 			if ((_diagnostics.length) == 0) {
-				vscode.window.showInformationMessage("Clean Code: No Issues Detected")
+				vscode.window.showInformationMessage("Clean Code: No Issues Detected");
 			}
-			llm_diagnostics.set(file_uri, _diagnostics)
-			context.subscriptions.push(llm_diagnostics)
+			llm_diagnostics.set(file_uri, _diagnostics);
+			context.subscriptions.push(llm_diagnostics);
 		  });
 		vscode.window.showInformationMessage('Linting...');
 	});
 	const init_shell_cmd = vscode.commands.registerCommand('llm4lint-vsc.init_shell', (cmd_context) => {
-		console.log(cmd_context["path"])
+		console.log(cmd_context["path"]);
 		vscode.window.showInformationMessage('Init_shell');
 	});
 
