@@ -7,8 +7,15 @@
     "vscode": "^1.96.0"
   },
   "categories": [
+    "Linters",
+    "AI",
+    "Programming Languages",
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahmedhus22/llm4lint-vsc-extension.git"
+  },
   "activationEvents": [
 
   ],
