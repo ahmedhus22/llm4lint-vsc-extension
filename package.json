@@ -9,15 +9,31 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["*"],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
+    "commands":[
       {
-        "command": "llm4lint-vsc.helloWorld",
-        "title": "Hello World"
+        "command": "llm4lint-vsc.get_lints",
+        "title": "Lint using LLM"
+      },
+      {
+        "command": "llm4lint-vsc.init_shell",
+        "title": "Lint in Interactive shell"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceLangId == python",
+          "command": "llm4lint-vsc.get_lints"
+        },
+        {
+          "when": "resourceLangId == python",
+          "command": "llm4lint-vsc.init_shell"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

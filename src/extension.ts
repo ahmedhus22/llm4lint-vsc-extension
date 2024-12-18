@@ -13,13 +13,19 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('llm4lint-vsc.helloWorld', () => {
+	const get_lints_cmd = vscode.commands.registerCommand('llm4lint-vsc.get_lints', (context) => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from llm4lint VSC!');
+		console.log(context["path"])
+		vscode.window.showInformationMessage('get_lints');
+	});
+	const init_shell_cmd = vscode.commands.registerCommand('llm4lint-vsc.init_shell', (context) => {
+		console.log(context["path"])
+		vscode.window.showInformationMessage('Init_shell');
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(get_lints_cmd);
+	context.subscriptions.push(init_shell_cmd);
 }
 
 // This method is called when your extension is deactivated
