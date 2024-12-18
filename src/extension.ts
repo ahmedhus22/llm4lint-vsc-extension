@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 				model: 'llm4lint7b',
 				messages: [{ role: 'user', content: prompt + code_with_lines }],
 			})
-			console.log(response.message.content)
+			//console.log(response.message.content)
 			const output_lines = response.message.content.split("\n")
 
 			// display diagnostics
@@ -38,8 +38,13 @@ export function activate(context: vscode.ExtensionContext) {
 			for (let index = 0; index < output_lines.length; index++) {
 				const line = output_lines[index];
 				const lno = Number(line.at(0));
-				const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno,0,lno,2), line.slice(4));
-				_diagnostics.push(file_diagnostic)
+				if (!isNaN(lno)) {
+					const file_diagnostic = new vscode.Diagnostic(new vscode.Range(lno,0,lno,2), line.slice(4));
+					_diagnostics.push(file_diagnostic)
+				}
+			}
+			if ((_diagnostics.length) == 0) {
+				vscode.window.showInformationMessage("Clean Code: No Issues Detected")
 			}
 			llm_diagnostics.set(file_uri, _diagnostics)
 			context.subscriptions.push(llm_diagnostics)
