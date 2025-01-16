@@ -1,24 +1,14 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import ollama from 'ollama';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "llm4lint-vsc" is now active!');
 	let llm_diagnostics = vscode.languages.createDiagnosticCollection("LLM4Lint");
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
 	const get_lints_cmd = vscode.commands.registerCommand('llm4lint-vsc.get_lints', (cmd_context) => {
 		llm_diagnostics.clear();
 		const prompt = "Perform linting on the given code. Specify output in format: <line_number> - <type>: <issue>\n";
 		let file_uri = vscode.Uri.file(cmd_context["path"]);
-		// vscode.commands.executeCommand("vscode.open", file_uri);
+
+		// perform inference using ollama and then display diagnostics
 		vscode.workspace.openTextDocument(file_uri).then(async (document) => {
 			let code = document.getText();
 			let code_lines = code.split("\n");
@@ -31,7 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 				model: 'llm4lint7b',
 				messages: [{ role: 'user', content: prompt + code_with_lines }],
 			})
-			//console.log(response.message.content)
 			const output_lines = response.message.content.split("\n")
 
 			// display diagnostics
@@ -54,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 			llm_diagnostics.set(file_uri, _diagnostics);
 			context.subscriptions.push(llm_diagnostics);
-		  });
+		});
 		vscode.window.showInformationMessage('Linting...');
 	});
 	const init_shell_cmd = vscode.commands.registerCommand('llm4lint-vsc.init_shell', (cmd_context) => {
@@ -75,5 +64,4 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(init_shell_cmd);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
