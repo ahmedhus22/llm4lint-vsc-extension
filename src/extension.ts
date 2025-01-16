@@ -10,11 +10,11 @@ export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "llm4lint-vsc" is now active!');
+	let llm_diagnostics = vscode.languages.createDiagnosticCollection("LLM4Lint");
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const get_lints_cmd = vscode.commands.registerCommand('llm4lint-vsc.get_lints', (cmd_context) => {
-		let llm_diagnostics = vscode.languages.createDiagnosticCollection("LLM4Lint");
 		llm_diagnostics.clear();
 		const prompt = "Perform linting on the given code. Specify output in format: <line_number> - <type>: <issue>\n";
 		let file_uri = vscode.Uri.file(cmd_context["path"]);
