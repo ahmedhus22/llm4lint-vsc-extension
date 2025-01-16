@@ -67,6 +67,9 @@ export function activate(context: vscode.ExtensionContext) {
 		terminal.show()
 		vscode.window.showInformationMessage("If Shell fails to launch install using: 'pip install llm4lint'");
 	});
+	const clear_lints = vscode.commands.registerCommand('llm4lint-vsc.clear_lints', (cmd_context) => {
+		llm_diagnostics.clear();
+	});
 
 	context.subscriptions.push(get_lints_cmd);
 	context.subscriptions.push(init_shell_cmd);
