@@ -17,20 +17,28 @@ export function activate(context: vscode.ExtensionContext) {
 				const line = code_lines[index];
 				code_with_lines += String(index+1) + "   " + line + "\n";
 			}
-			const response = await ollama.chat({
-				model: 'llm4lint7b',
-				messages: [{ role: 'user', content: prompt + code_with_lines }],
-			})
-			const output_lines = response.message.content.split("\n")
-
+			const output_lines = new Set<String>();
+			// multi-sampling inference to account for non-deterministic outputs
+			for(let i=0; i<4; ++i) {
+				const response = await ollama.chat({
+					model: 'llm4lint7b',
+					messages: [{ role: 'user', content: prompt + code_with_lines }],
+				})
+				const output_text = response.message.content.split("\n")
+				for (const line of output_text) {
+					output_lines.add(line);
+				}
+			}
 			// display diagnostics
 			let _diagnostics = [];
 			const _severity = vscode.DiagnosticSeverity.Warning;
-			for (let index = 0; index < output_lines.length; index++) {
-				const line = output_lines[index];
+			const max_lines = code_lines.length;
+			for (const line of output_lines) {
 				const lno = Number(line.at(0));
-				// console.log(lno) lineno is off by +1 for some reason...
-				if (!isNaN(lno)) {
+				if (lno > max_lines) {
+					continue
+				}
+				else if (!isNaN(lno)) {
 					const start_char = code_lines.at(lno)?.charAt(0)
 					let end_char = code_lines.at(lno)?.length
 					end_char ??= 0
