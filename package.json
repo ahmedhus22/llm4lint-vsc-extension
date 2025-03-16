@@ -1,8 +1,9 @@
 {
   "name": "llm4lint-vsc",
   "displayName": "llm4lint VSC",
+  "publisher": "ahmedhus22",
   "description": "A Local LLM Linter, If you want to finetune with your own examples; Get the training script from https://github.com/ahmedhus22/llm4lint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.96.0"
   },
